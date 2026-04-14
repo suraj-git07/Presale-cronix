@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useConnect, useConnection, useDisconnect } from 'wagmi'
+import { useConnect, useConnection, useDisconnect, useSwitchChain, useAccount } from 'wagmi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { playUiClick } from '@/lib/sound'
+import { bsc } from 'viem/chains'
 
 function shortAddress(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`
@@ -15,10 +16,19 @@ type WalletConnectButtonProps = {
 
 export function WalletConnectButton({ className = '', id }: WalletConnectButtonProps) {
   const { address, isConnected, status } = useConnection()
+  const { chainId } = useAccount()
   const { connectors, mutate: connect, isPending } = useConnect()
   const { disconnect } = useDisconnect()
+  const { switchChain } = useSwitchChain()
   const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+
+  // Auto-switch to BSC when wallet connects if on different chain
+  useEffect(() => {
+    if (isConnected && chainId && chainId !== bsc.id) {
+      switchChain({ chainId: bsc.id })
+    }
+  }, [isConnected, chainId, switchChain])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -65,7 +75,11 @@ export function WalletConnectButton({ className = '', id }: WalletConnectButtonP
         aria-expanded={menuOpen}
         aria-haspopup="menu"
       >
-        {shortAddress(address)}
+        <span className="flex items-center gap-2">
+          {/* Green dot indicator */}
+          <span className="inline-flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+          {shortAddress(address)}
+        </span>
         <ChevronDown className={`h-4 w-4 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
       </button>
       <AnimatePresence>

@@ -110,7 +110,7 @@ export function HeroSection() {
           Secure your CRONIX before launch
         </p>
 
-        <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+        {/* <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
           <WalletConnectButton id="hero-connect" className="w-full sm:w-auto" />
           <button
             type="button"
@@ -122,7 +122,7 @@ export function HeroSection() {
           >
             Buy Tokens
           </button>
-        </div>
+        </div> */}
       </motion.div>
     </section>
   )

@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
-import { playUiClick } from '@/lib/sound'
 import {
   DEMO_RATES,
-  type PayAsset,
   computeTokensReceived,
+  getRemainingCapacity,
+  isAmountExceedsCapacity,
   usePresaleStore,
 } from '@/store/presaleStore'
 
@@ -14,62 +14,34 @@ function formatTokens(n: number | null) {
   return n.toLocaleString(undefined, { maximumFractionDigits: 2 })
 }
 
+function formatUsd(n: number) {
+  return n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+}
+
 export function TokenCalculator() {
-  const payWith = usePresaleStore((s) => s.payWith)
   const amount = usePresaleStore((s) => s.amount)
-  const setPayWith = usePresaleStore((s) => s.setPayWith)
+  const raisedUsd = usePresaleStore((s) => s.raisedUsd)
   const setAmount = usePresaleStore((s) => s.setAmount)
 
   const tokens = computeTokensReceived(
-    payWith,
     amount,
-    DEMO_RATES.bnbUsd,
     DEMO_RATES.tokenPriceUsd,
   )
 
-  const toggle = (next: PayAsset) => {
-    playUiClick()
-    setPayWith(next)
-  }
+  const remainingCapacity = getRemainingCapacity(raisedUsd)
+  const exceedsCapacity = isAmountExceedsCapacity(amount, raisedUsd)
 
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-white/38">
-          Pay with
-        </p>
-        <div className="surface-3d-subtle flex rounded-2xl p-1">
-          {(['BNB', 'USDT'] as const).map((asset) => {
-            const active = payWith === asset
-            return (
-              <button
-                key={asset}
-                type="button"
-                onClick={() => toggle(asset)}
-                className={`focus-ring relative flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                  active
-                    ? 'text-black'
-                    : 'text-white/45 hover:text-white/75'
-                }`}
-              >
-                {active ? (
-                  <motion.span
-                    layoutId="pay-toggle"
-                    className="btn-3d-solid absolute inset-0 -z-10 rounded-xl border border-white/30 bg-white"
-                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                  />
-                ) : null}
-                <span className="relative z-10">{asset}</span>
-              </button>
-            )
-          })}
+        <div className="mb-2 flex items-center justify-between">
+          <label htmlFor="pay-amount" className="text-xs font-medium uppercase tracking-widest text-white/38">
+            Enter amount (USDT)
+          </label>
+          <span className="text-xs text-white/45">
+            Remaining: {formatUsd(remainingCapacity)}
+          </span>
         </div>
-      </div>
-
-      <div>
-        <label htmlFor="pay-amount" className="mb-2 block text-xs font-medium uppercase tracking-widest text-white/38">
-          Enter amount ({payWith})
-        </label>
         <input
           id="pay-amount"
           type="text"
@@ -77,8 +49,21 @@ export function TokenCalculator() {
           placeholder="0.0"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="focus-ring inset-3d w-full rounded-2xl border border-white/10 bg-[#010101] px-4 py-3 font-mono text-lg text-white placeholder:text-white/25 outline-none transition-colors focus:border-white/32"
+          className={`focus-ring inset-3d w-full rounded-2xl border px-4 py-3 font-mono text-lg text-white placeholder:text-white/25 outline-none transition-colors ${
+            exceedsCapacity
+              ? 'border-red-500/50 bg-red-950/20 focus:border-red-500'
+              : 'border-white/10 bg-[#010101] focus:border-white/32'
+          }`}
         />
+        {exceedsCapacity && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-2 text-xs text-red-400"
+          >
+            ⚠️ Amount exceeds remaining capacity ({formatUsd(remainingCapacity)} available)
+          </motion.p>
+        )}
       </div>
 
       <div className="surface-3d-subtle rounded-2xl px-4 py-3">

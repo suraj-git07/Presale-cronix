@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useConnection } from 'wagmi'
+import { useConnection, useAccount } from 'wagmi'
+import { bsc } from 'viem/chains'
 import { CountdownTimer } from '@/components/CountdownTimer'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TokenCalculator } from '@/components/TokenCalculator'
@@ -10,6 +11,8 @@ import {
   DEMO_PRESALE,
   DEMO_RATES,
   computeTokensReceived,
+  getProgressPercentage,
+  isAmountExceedsCapacity,
   usePresaleStore,
 } from '@/store/presaleStore'
 
@@ -20,10 +23,11 @@ function formatUsd(n: number) {
 export function PresaleCard() {
   const reduceMotion = useReducedMotion()
   const { isConnected } = useConnection()
+  const { chainId } = useAccount()
   const isHydrating = usePresaleStore((s) => s.isHydrating)
   const finishHydration = usePresaleStore((s) => s.finishHydration)
-  const payWith = usePresaleStore((s) => s.payWith)
   const amount = usePresaleStore((s) => s.amount)
+  const raisedUsd = usePresaleStore((s) => s.raisedUsd)
   const nextTierEndsAt = usePresaleStore((s) => s.nextTierEndsAt)
 
   useEffect(() => {
@@ -32,20 +36,17 @@ export function PresaleCard() {
   }, [finishHydration])
 
   const tokens = computeTokensReceived(
-    payWith,
     amount,
-    DEMO_RATES.bnbUsd,
     DEMO_RATES.tokenPriceUsd,
   )
-  const canBuy = isConnected && tokens !== null && tokens > 0
+  const exceedsCapacity = isAmountExceedsCapacity(amount, raisedUsd)
+  const progressPct = Math.round(getProgressPercentage(raisedUsd))
+  const canBuy = isConnected && chainId === bsc.id && tokens !== null && tokens > 0 && !exceedsCapacity
 
   const onBuy = () => {
     playUiClick()
     if (!canBuy) return
-    // Stub until presale contract + ABI are wired
-    window.alert(
-      'CroniX on-chain presale is not configured yet. Connect wallet and use this UI as a demo.',
-    )
+    
   }
 
   return (
@@ -79,13 +80,13 @@ export function PresaleCard() {
           <div className="mb-4 space-y-2">
             <div className="flex justify-between text-xs text-white/38">
               <span>Progress</span>
-              <span className="font-mono text-white/55">{DEMO_PRESALE.progressPct}%</span>
+              <span className="font-mono text-white/55">{progressPct}%</span>
             </div>
-            <ProgressBar value={DEMO_PRESALE.progressPct} isLoading={isHydrating} />
+            <ProgressBar value={progressPct} isLoading={isHydrating} />
           </div>
 
           <p className="mb-6 text-center text-sm text-white/45">
-            <span className="font-mono text-white">{formatUsd(DEMO_PRESALE.raisedUsd)}</span>
+            <span className="font-mono text-white">{formatUsd(raisedUsd)}</span>
             <span className="text-white/22"> / </span>
             <span className="font-mono text-white/75">{formatUsd(DEMO_PRESALE.capUsd)}</span>
             <span className="block text-xs text-white/28">Total raised / Hard cap</span>
@@ -104,23 +105,27 @@ export function PresaleCard() {
 
         <TokenCalculator />
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-          {!isConnected ? (
+        {!isConnected ? (
+          <div className="mt-8">
+            <WalletConnectButton className="w-full" />
+          </div>
+        ) : (
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
             <WalletConnectButton className="w-full sm:flex-1" />
-          ) : (
-            <p className="text-center text-sm text-white/42 sm:flex-1 sm:text-left">
-              Wallet connected — enter an amount to buy CRONIX in the CroniX presale.
-            </p>
-          )}
-          <button
-            type="button"
-            disabled={!canBuy}
-            onClick={onBuy}
-            className="focus-ring btn-3d-solid w-full rounded-2xl border border-white/25 bg-white px-6 py-3.5 text-sm font-bold uppercase tracking-[0.15em] text-black transition-all hover:bg-neutral-100 disabled:cursor-not-allowed disabled:border-white/8 disabled:bg-[#0a0a0a] disabled:text-white/35 disabled:shadow-none sm:w-auto sm:min-w-[10rem]"
-          >
-            Buy CRONIX
-          </button>
-        </div>
+            <button
+              type="button"
+              disabled={!canBuy}
+              onClick={onBuy}
+              className={`focus-ring btn-3d-solid w-full rounded-2xl border border-white/25 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.15em] transition-all sm:flex-1 ${
+                chainId === bsc.id
+                  ? 'bg-green-500 text-black hover:bg-green-400 disabled:bg-green-300/50'
+                  : 'bg-white text-black hover:bg-neutral-100 disabled:bg-[#0a0a0a] disabled:text-white/35 disabled:border-white/8 disabled:shadow-none'
+              }`}
+            >
+              {chainId !== bsc.id ? 'Switch to BSC' : 'Buy CRONIX'}
+            </button>
+          </div>
+        )}
       </motion.div>
     </motion.section>
   )
