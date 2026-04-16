@@ -3,7 +3,7 @@ import { useConnect, useConnection, useDisconnect, useSwitchChain, useAccount } 
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { playUiClick } from '@/lib/sound'
-import { bsc } from 'viem/chains'
+import { bscTestnet } from 'viem/chains'
 
 function shortAddress(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`
@@ -23,10 +23,11 @@ export function WalletConnectButton({ className = '', id }: WalletConnectButtonP
   const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
-  // Auto-switch to BSC when wallet connects if on different chain
+  // Auto-switch to BSC Testnet when wallet connects if on different chain
   useEffect(() => {
-    if (isConnected && chainId && chainId !== bsc.id) {
-      switchChain({ chainId: bsc.id })
+    if (isConnected && chainId && chainId !== bscTestnet.id) {
+      switchChain({ chainId: bscTestnet.id })
+      console.log(' Switching to BSC Testnet (97)...')
     }
   }, [isConnected, chainId, switchChain])
 

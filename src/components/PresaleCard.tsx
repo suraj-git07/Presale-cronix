@@ -1,17 +1,20 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useConnection, useAccount } from 'wagmi'
-import { bsc } from 'viem/chains'
+import { bscTestnet } from 'viem/chains'
+import { formatUnits } from 'viem'
 import { CountdownTimer } from '@/components/CountdownTimer'
 import { ProgressBar } from '@/components/ProgressBar'
 import { TokenCalculator } from '@/components/TokenCalculator'
 import { WalletConnectButton } from '@/components/WalletConnectButton'
 import { playUiClick } from '@/lib/sound'
+import { usePresaleContract } from '@/hooks/usePresaleContract'
+import { useBuyTokensFlow } from '@/hooks/useBuyTokensFlow'
+import { useTokenBalances } from '@/hooks/useTokenBalances'
 import {
   DEMO_PRESALE,
   DEMO_RATES,
   computeTokensReceived,
-  getProgressPercentage,
   isAmountExceedsCapacity,
   usePresaleStore,
 } from '@/store/presaleStore'
@@ -24,29 +27,135 @@ export function PresaleCard() {
   const reduceMotion = useReducedMotion()
   const { isConnected } = useConnection()
   const { chainId } = useAccount()
+  
+  // Store state
   const isHydrating = usePresaleStore((s) => s.isHydrating)
   const finishHydration = usePresaleStore((s) => s.finishHydration)
   const amount = usePresaleStore((s) => s.amount)
   const raisedUsd = usePresaleStore((s) => s.raisedUsd)
+  const maxSupplyUsd = usePresaleStore((s) => s.maxSupplyUsd)
+  const userTokensBought = usePresaleStore((s) => s.userTokensBought)
+  const claimAllowed = usePresaleStore((s) => s.claimAllowed)
+  const setUserTokensBought = usePresaleStore((s) => s.setUserTokensBought)
+  const setClaimAllowed = usePresaleStore((s) => s.setClaimAllowed)
+  const setRaisedUsd = usePresaleStore((s) => s.setRaisedUsd)
+  const setMaxSupply = usePresaleStore((s) => s.setMaxSupply)
+  const setMaxSupplyUsd = usePresaleStore((s) => s.setMaxSupplyUsd)
   const nextTierEndsAt = usePresaleStore((s) => s.nextTierEndsAt)
+
+  // Web3 hooks
+  const { tokensBoughtByUser, totalTokensSold, claimAllowed: contractClaimAllowed, isClaiming, onClaimTokens, refetchTokensBought, refetchPresaleInfo, refetchTotalTokensSold } = usePresaleContract()
+  const { step, label, isBusy, isDone, errorMsg, onBuy } = useBuyTokensFlow(amount)
+  const { usdtBalanceFormatted } = useTokenBalances()
+
+  // Track claim state to detect when claim completes
+  const prevIsClaimingRef = useRef(isClaiming)
+
+  // Sync Web3 data to store: totalTokensSold -> raisedUsd
+  useEffect(() => {
+    if (totalTokensSold) {
+      const tokensSoldBig = totalTokensSold as bigint
+      const tokensSoldNumber = Number(formatUnits(tokensSoldBig, 18))
+      const calculatedRaisedUsd = tokensSoldNumber * DEMO_RATES.tokenPriceUsd
+      setRaisedUsd(calculatedRaisedUsd)
+      console.log('Total tokens sold updated:', { tokensSoldBig: tokensSoldBig.toString(), tokensSoldNumber, raisedUsd: calculatedRaisedUsd })
+    }
+  }, [totalTokensSold, setRaisedUsd])
+
+  // Sync max supply: 500k tokens = 25M USDT (500000 * 0.05)
+  useEffect(() => {
+    const maxSupplyTokens = 500_000 // From contract
+    const calculatedMaxUsd = maxSupplyTokens * DEMO_RATES.tokenPriceUsd
+    setMaxSupply(maxSupplyTokens * 1e18) // Store as wei
+    setMaxSupplyUsd(calculatedMaxUsd)
+  }, [setMaxSupply, setMaxSupplyUsd])
+
+  useEffect(() => {
+    if (tokensBoughtByUser !== undefined && tokensBoughtByUser !== null) {
+      const tokensBought = Number(formatUnits(tokensBoughtByUser as bigint, 18))
+      setUserTokensBought(tokensBought)
+      console.log('✅ User tokens bought updated:', { 
+        raw: (tokensBoughtByUser as bigint).toString(), 
+        formatted: tokensBought,
+        isZero: tokensBought === 0
+      })
+    }
+  }, [tokensBoughtByUser, setUserTokensBought])
+
+  useEffect(() => {
+    if (contractClaimAllowed !== undefined) {
+      setClaimAllowed(contractClaimAllowed)
+    }
+  }, [contractClaimAllowed, setClaimAllowed])
 
   useEffect(() => {
     const t = window.setTimeout(() => finishHydration(), 800)
     return () => window.clearTimeout(t)
   }, [finishHydration])
 
-  const tokens = computeTokensReceived(
-    amount,
-    DEMO_RATES.tokenPriceUsd,
-  )
+  const tokens = computeTokensReceived(amount, DEMO_RATES.tokenPriceUsd)
   const exceedsCapacity = isAmountExceedsCapacity(amount, raisedUsd)
-  const progressPct = Math.round(getProgressPercentage(raisedUsd))
-  const canBuy = isConnected && chainId === bsc.id && tokens !== null && tokens > 0 && !exceedsCapacity
+  const progressPct = Math.round((raisedUsd / maxSupplyUsd) * 100)
+  const canBuy = isConnected && chainId === bscTestnet.id && tokens !== null && tokens > 0 && !exceedsCapacity
 
-  const onBuy = () => {
+  const handleBuyClick = async () => {
     playUiClick()
-    if (!canBuy) return
-    
+    onBuy()
+  }
+
+  // Refetch all data when transaction is successful
+  useEffect(() => {
+    if (isDone) {
+      // Refetch all contract data with delay for block confirmation
+      console.log('⏳ Waiting for block confirmation before refetch...')
+      setTimeout(() => {
+        console.log('📊 Refetching all contract data...')
+        refetchTokensBought?.()
+        refetchPresaleInfo?.()
+        refetchTotalTokensSold?.()
+      }, 3000)
+      
+      // Reset the amount after successful purchase
+      usePresaleStore.setState({ amount: '' })
+    }
+  }, [isDone, refetchTokensBought, refetchPresaleInfo, refetchTotalTokensSold])
+
+  // Refetch balance immediately when claim is done
+  useEffect(() => {
+    // Check if claim was in progress and now it's done
+    if (prevIsClaimingRef.current && !isClaiming) {
+      console.log('✅ Claim transaction completed! Triggering UI refresh...')
+      
+      // Immediate refetch
+      refetchTokensBought?.()
+      
+      // Multiple refetch attempts at different intervals to catch the data update
+      setTimeout(() => {
+        console.log('🔄 Refetch attempt 1 (1s)...')
+        refetchTokensBought?.()
+      }, 1000)
+      
+      setTimeout(() => {
+        console.log('🔄 Refetch attempt 2 (2.5s)...')
+        refetchTokensBought?.()
+      }, 2500)
+      
+      setTimeout(() => {
+        console.log('🔄 Refetch attempt 3 (4s)...')
+        refetchTokensBought?.()
+      }, 4000)
+    }
+    // Update the ref for next time
+    prevIsClaimingRef.current = isClaiming
+  }, [isClaiming, refetchTokensBought])
+
+  const onClaim = async () => {
+    playUiClick()
+    try {
+      await onClaimTokens()
+    } catch (error) {
+      console.error('Claim failed:', error)
+    }
   }
 
   return (
@@ -88,8 +197,8 @@ export function PresaleCard() {
           <p className="mb-6 text-center text-sm text-white/45">
             <span className="font-mono text-white">{formatUsd(raisedUsd)}</span>
             <span className="text-white/22"> / </span>
-            <span className="font-mono text-white/75">{formatUsd(DEMO_PRESALE.capUsd)}</span>
-            <span className="block text-xs text-white/28">Total raised / Hard cap</span>
+            <span className="font-mono text-white/75">{formatUsd(maxSupplyUsd)}</span>
+            <span className="block text-xs text-white/28">Total raised / Max supply</span>
           </p>
         </div>
 
@@ -105,25 +214,75 @@ export function PresaleCard() {
 
         <TokenCalculator />
 
+        {/* User holdings - show when connected */}
+        {isConnected && (
+          <div className="mb-6 grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-2">
+            <div className="surface-3d-subtle min-w-0 rounded-2xl px-4 py-3">
+              <p className="text-xs uppercase tracking-widest text-white/38">Your Claimable CRONIX</p>
+              <p className="mt-1 font-[family-name:var(--font-orbitron)] text-lg font-semibold text-white">
+                {userTokensBought > 0 ? userTokensBought.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0'}
+              </p>
+            </div>
+            <div className="surface-3d-subtle min-w-0 rounded-2xl px-4 py-3">
+              <p className="text-xs uppercase tracking-widest text-white/38">Your USDT</p>
+              <p className="mt-1 font-[family-name:var(--font-orbitron)] text-lg font-semibold text-white">
+                {usdtBalanceFormatted && usdtBalanceFormatted !== '0' ? parseFloat(usdtBalanceFormatted).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0'}
+              </p>
+            </div>
+          </div>
+        )}
+
         {!isConnected ? (
           <div className="mt-8">
             <WalletConnectButton className="w-full" />
           </div>
         ) : (
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-            <WalletConnectButton className="w-full sm:flex-1" />
-            <button
-              type="button"
-              disabled={!canBuy}
-              onClick={onBuy}
-              className={`focus-ring btn-3d-solid w-full rounded-2xl border border-white/25 px-6 py-3.5 text-sm font-bold uppercase tracking-[0.15em] transition-all sm:flex-1 ${
-                chainId === bsc.id
-                  ? 'bg-green-500 text-black hover:bg-green-400 disabled:bg-green-300/50'
-                  : 'bg-white text-black hover:bg-neutral-100 disabled:bg-[#0a0a0a] disabled:text-white/35 disabled:border-white/8 disabled:shadow-none'
-              }`}
-            >
-              {chainId !== bsc.id ? 'Switch to BSC' : 'Buy CRONIX'}
-            </button>
+            <WalletConnectButton className="w-full sm:w-auto sm:flex-shrink-0" />
+            <div className="flex flex-col gap-3 flex-1">
+              {/* Claim button - show ONLY when claiming is allowed */}
+              {claimAllowed ? (
+                <button
+                  type="button"
+                  disabled={isClaiming || userTokensBought === 0}
+                  onClick={onClaim}
+                  className={`focus-ring btn-3d-solid w-full rounded-2xl border px-6 py-3.5 text-sm font-mono font-bold tracking-wider transition-all ${
+                    userTokensBought > 0
+                      ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-black border-cyan-400/50 hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] cursor-pointer'
+                      : 'bg-gray-500 text-white/60 border-white/10 cursor-not-allowed'
+                  }`}
+                >
+                  {isClaiming ? 'Claiming...' : userTokensBought > 0 ? `Claim ${userTokensBought.toFixed(0)} Tokens` : 'No Tokens to Claim'}
+                </button>
+              ) : (
+                <>
+                  {/* Buy button - show only when claiming is NOT allowed */}
+                  <button
+                    type="button"
+                    disabled={(!canBuy && step === 'idle') || isBusy || isDone}
+                    onClick={handleBuyClick}
+                    className={`focus-ring btn-3d-solid w-full rounded-2xl border px-6 py-3.5 text-sm font-mono font-bold tracking-wider transition-all ${
+                      chainId === bscTestnet.id
+                        ? canBuy && step === 'idle'
+                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black border-green-400/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer'
+                          : 'bg-green-500/50 text-white/60 border-green-400/20 cursor-not-allowed'
+                        : canBuy && step === 'idle'
+                          ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-black border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] cursor-pointer'
+                          : 'bg-gray-500/50 text-white/60 border-white/10 cursor-not-allowed'
+                    }`}
+                  >
+                    {chainId !== bscTestnet.id 
+                      ? 'Switch to BSC Testnet' 
+                      : label}
+                  </button>
+
+                  {/* Show error message if any */}
+                  {errorMsg && (
+                    <p className="text-xs text-red-400 mt-2">{errorMsg}</p>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
       </motion.div>

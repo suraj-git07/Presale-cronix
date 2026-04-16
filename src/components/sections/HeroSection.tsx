@@ -1,11 +1,5 @@
 import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { WalletConnectButton } from '@/components/WalletConnectButton'
-import { playUiClick } from '@/lib/sound'
-
-function scrollToPresale() {
-  document.getElementById('presale')?.scrollIntoView({ behavior: 'auto', block: 'start' })
-}
 
 type Particle = { id: number; x: string; y: string; d: number; delay: number; big?: boolean }
 

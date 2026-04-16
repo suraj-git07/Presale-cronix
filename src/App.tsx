@@ -1,4 +1,5 @@
 import { CosmicBackdrop } from '@/components/CosmicBackdrop'
+import { ToastContainer } from '@/components/ToastContainer'
 import { PresaleCard } from '@/components/PresaleCard'
 import { FooterSection } from '@/components/sections/FooterSection'
 import { HeroSection } from '@/components/sections/HeroSection'
@@ -18,6 +19,7 @@ export default function App() {
         <HowToBuySection />
         <FooterSection />
       </div>
+      <ToastContainer />
     </>
   )
 }

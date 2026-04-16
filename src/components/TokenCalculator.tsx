@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
+import React from 'react'
 import {
   DEMO_RATES,
   computeTokensReceived,
-  getRemainingCapacity,
   isAmountExceedsCapacity,
   usePresaleStore,
 } from '@/store/presaleStore'
@@ -21,14 +21,26 @@ function formatUsd(n: number) {
 export function TokenCalculator() {
   const amount = usePresaleStore((s) => s.amount)
   const raisedUsd = usePresaleStore((s) => s.raisedUsd)
+  const maxSupplyUsd = usePresaleStore((s) => s.maxSupplyUsd)
   const setAmount = usePresaleStore((s) => s.setAmount)
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    // Only allow numbers and one decimal point
+    const validValue = value.replace(/[^\d.]/g, '')
+    // Prevent multiple decimal points
+    const finalValue = validValue.split('.').length > 2 
+      ? validValue.substring(0, validValue.lastIndexOf('.'))
+      : validValue
+    setAmount(finalValue)
+  }
 
   const tokens = computeTokensReceived(
     amount,
     DEMO_RATES.tokenPriceUsd,
   )
 
-  const remainingCapacity = getRemainingCapacity(raisedUsd)
+  const remainingCapacity = maxSupplyUsd - raisedUsd
   const exceedsCapacity = isAmountExceedsCapacity(amount, raisedUsd)
 
   return (
@@ -38,9 +50,6 @@ export function TokenCalculator() {
           <label htmlFor="pay-amount" className="text-xs font-medium uppercase tracking-widest text-white/38">
             Enter amount (USDT)
           </label>
-          <span className="text-xs text-white/45">
-            Remaining: {formatUsd(remainingCapacity)}
-          </span>
         </div>
         <input
           id="pay-amount"
@@ -48,7 +57,7 @@ export function TokenCalculator() {
           inputMode="decimal"
           placeholder="0.0"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={handleAmountChange}
           className={`focus-ring inset-3d w-full rounded-2xl border px-4 py-3 font-mono text-lg text-white placeholder:text-white/25 outline-none transition-colors ${
             exceedsCapacity
               ? 'border-red-500/50 bg-red-950/20 focus:border-red-500'
@@ -61,7 +70,7 @@ export function TokenCalculator() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-2 text-xs text-red-400"
           >
-            ⚠️ Amount exceeds remaining capacity ({formatUsd(remainingCapacity)} available)
+            Amount exceeds remaining capacity ({formatUsd(remainingCapacity)} available)
           </motion.p>
         )}
       </div>
