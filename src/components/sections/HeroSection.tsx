@@ -145,7 +145,7 @@ export function HeroSection() {
             ENTER THE CRONIX PRESALE
           </motion.h1>
 
-          <p className="mx-auto mt-5 max-w-xl text-base text-white/45 sm:text-lg [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
+          <p className="mx-auto mt-5 max-w-xl font-[family-name:var(--font-orbitron)] text-base text-white/45 sm:text-lg [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
             Secure your CRONIX before launch
           </p>
 
@@ -162,6 +162,21 @@ export function HeroSection() {
               Buy Tokens
             </button>
           </div> */}
+        </motion.div>
+
+        {/* Scroll down indicator */}
+        <motion.div 
+          className="mt-12 flex flex-col items-center gap-2"
+          animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <p className="font-[family-name:var(--font-orbitron)] text-xs tracking-widest text-white/30 uppercase">Scroll down</p>
+          <motion.div
+            animate={reduceMotion ? undefined : { y: [0, 6, 0] }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+          >
+            <div className="h-5 w-0.5 bg-gradient-to-b from-cyan-500/50 to-transparent" />
+          </motion.div>
         </motion.div>
       </motion.div>
     </section>

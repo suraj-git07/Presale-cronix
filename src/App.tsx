@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useConnection, useAccount } from 'wagmi'
 import { CosmicBackdrop } from '@/components/CosmicBackdrop'
+import { ScrollTracker } from '@/components/ScrollTracker'
 import { ToastContainer } from '@/components/ToastContainer'
 import { PresaleCard } from '@/components/PresaleCard'
 import { FooterSection } from '@/components/sections/FooterSection'
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <>
       <CosmicBackdrop />
+      <ScrollTracker />
       <div className="relative z-10 min-h-svh bg-transparent text-white antialiased">
         <HeroSection />
         <PresaleCard />
