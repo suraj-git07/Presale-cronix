@@ -1,17 +1,18 @@
 import { http, createConfig } from 'wagmi'
-import { bsc } from 'viem/chains'
+import { bsc, bscTestnet } from 'viem/chains'
 import { injected, walletConnect } from 'wagmi/connectors'
+import { NETWORKS } from '@/config/networks'
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
-const bscRpc = import.meta.env.VITE_BSC_RPC_URL
 
 export const wagmiConfig = createConfig({
-  chains: [bsc],
+  chains: [bsc, bscTestnet], // Primary chain is bsc (mainnet)
   connectors: [
     injected(),
     ...(projectId ? [walletConnect({ projectId })] : []),
   ],
   transports: {
-    [bsc.id]: http(bscRpc || undefined),
+    [bscTestnet.id]: http(NETWORKS.bscTestnet.rpc),
+    [bsc.id]: http(NETWORKS.bscMainnet.rpc),
   },
 })

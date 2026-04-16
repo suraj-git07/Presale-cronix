@@ -7,7 +7,7 @@ const steps = [
   { icon: Zap, title: 'Confirm transaction', text: 'Review gas and approve in your wallet.' },
   {
     icon: CheckCircle2,
-    title: 'Receive tokens',
+    title: 'Claim tokens',
     text: 'CRONIX is credited per the live CroniX presale rate.',
   },
 ] as const

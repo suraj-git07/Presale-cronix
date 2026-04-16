@@ -1,11 +1,5 @@
 import { useMemo } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { WalletConnectButton } from '@/components/WalletConnectButton'
-import { playUiClick } from '@/lib/sound'
-
-function scrollToPresale() {
-  document.getElementById('presale')?.scrollIntoView({ behavior: 'auto', block: 'start' })
-}
 
 type Particle = { id: number; x: string; y: string; d: number; delay: number; big?: boolean }
 
@@ -110,7 +104,7 @@ export function HeroSection() {
           Secure your CRONIX before launch
         </p>
 
-        <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+        {/* <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
           <WalletConnectButton id="hero-connect" className="w-full sm:w-auto" />
           <button
             type="button"
@@ -122,7 +116,7 @@ export function HeroSection() {
           >
             Buy Tokens
           </button>
-        </div>
+        </div> */}
       </motion.div>
     </section>
   )

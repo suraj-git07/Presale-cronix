@@ -14,20 +14,31 @@ function formatRemaining(ms: number) {
   return { d: pad(days), h: pad(h), m: pad(m), s: pad(sec) }
 }
 
+
+
 type CountdownTimerProps = {
   targetTimestamp: number
-  label?: string
 }
 
-export function CountdownTimer({ targetTimestamp, label = 'Next tier in' }: CountdownTimerProps) {
-  const [now, setNow] = useState(() => Date.now())
+export function CountdownTimer({ targetTimestamp }: CountdownTimerProps) {
+  const [remaining, setRemaining] = useState(() => {
+    // Calculate remaining time on initial render based on fixed targetTimestamp
+    const diff = targetTimestamp - Date.now()
+    return diff > 0 ? diff : 0
+  })
 
   useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000)
+    // Tick down the countdown every second
+    const id = window.setInterval(() => {
+      setRemaining((prev) => {
+        const next = prev - 1000
+        return next > 0 ? next : 0
+      })
+    }, 1000)
     return () => window.clearInterval(id)
   }, [])
 
-  const { d, h, m, s } = formatRemaining(targetTimestamp - now)
+  const { d, h, m, s } = formatRemaining(remaining)
 
   const blocks = [
     { v: d, u: 'D' },
@@ -39,7 +50,7 @@ export function CountdownTimer({ targetTimestamp, label = 'Next tier in' }: Coun
   return (
     <div className="surface-3d-subtle min-w-0 w-full overflow-hidden rounded-2xl px-2 py-3 sm:px-3">
       <p className="mb-2 truncate text-center text-xs font-medium uppercase tracking-[0.15em] text-white/38 sm:tracking-[0.2em]">
-        {label}
+        PreSale ends In
       </p>
       <div className="grid w-full min-w-0 grid-cols-4 gap-1 sm:gap-1.5">
         {blocks.map(({ v, u }) => (
