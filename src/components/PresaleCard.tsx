@@ -167,7 +167,7 @@ export function PresaleCard() {
       className="mx-auto max-w-lg px-4 py-16 [perspective:1400px]"
     >
       <motion.div
-        className="surface-3d rounded-2xl p-6 sm:p-8"
+        className="surface-3d rounded-2xl p-8 sm:p-10 py-10 sm:py-12"
         style={{ transformStyle: 'preserve-3d' }}
         whileHover={
           reduceMotion
