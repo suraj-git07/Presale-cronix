@@ -17,10 +17,10 @@ export default function App() {
   const isWrongNetwork = isConnected && chainId && chainId !== 56
 
   useEffect(() => {
-    if (isWrongNetwork) {
-      addToast(' Please switch to BSC Mainnet', 'info', 5000)
+    if (!isWrongNetwork && isConnected && chainId === 56) {
+      addToast(' Network Switched to BSC Mainnet', 'success', 5000)
     }
-  }, [isWrongNetwork, addToast])
+  }, [isConnected, isWrongNetwork, chainId, addToast])
 
   return (
     <>

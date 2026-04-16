@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useConnection, useAccount } from 'wagmi'
 
@@ -24,6 +24,8 @@ export function PresaleCard() {
   const reduceMotion = useReducedMotion()
   const { isConnected } = useConnection()
   const { chainId } = useAccount()
+  const [networkSwitchFailed, setNetworkSwitchFailed] = useState(false)
+  const networkCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   
   // Store state
   const isHydrating = usePresaleStore((s) => s.isHydrating)
@@ -96,6 +98,27 @@ export function PresaleCard() {
   const isBelowMinimum = amountNum > 0 && amountNum < 50
   const progressPct = Math.round((raisedUsd / maxSupplyUsd) * 100)
   const canBuy = isConnected && chainId === BSC_MAINNET_CHAIN_ID && tokens !== null && tokens > 0 && !exceedsCapacity && !isBelowMinimum
+
+  // Monitor network switch status - show alert if still on wrong network after 3 seconds
+  useEffect(() => {
+    const isWrongNetwork = isConnected && chainId !== BSC_MAINNET_CHAIN_ID
+    
+    if (isWrongNetwork) {
+      if (networkCheckRef.current) clearTimeout(networkCheckRef.current)
+      networkCheckRef.current = setTimeout(() => {
+        setNetworkSwitchFailed(true)
+      }, 3000)
+    } else {
+      if (networkCheckRef.current) {
+        clearTimeout(networkCheckRef.current)
+        networkCheckRef.current = null
+      }
+    }
+    
+    return () => {
+      if (networkCheckRef.current) clearTimeout(networkCheckRef.current)
+    }
+  }, [isConnected, chainId])
 
   const handleBuyClick = async () => {
     playUiClick()
@@ -218,6 +241,13 @@ export function PresaleCard() {
           <p className="text-xs text-yellow-400 px-2 mt-2"> Minimum purchase is $50 USDT</p>
         )}
 
+        {/* Show network switch failed alert */}
+        {networkSwitchFailed && isConnected && chainId !== BSC_MAINNET_CHAIN_ID && (
+          <p className="text-xs text-white px-3 mt-2 rounded-lg py-2.5 border border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 shadow-[0_0_15px_rgba(34,211,238,0.2)] font-semibold">
+             Please manually switch your network to BSC Mainnet
+          </p>
+        )}
+
         {/* User holdings - show when connected */}
         {isConnected && (
           <div className="mb-6 grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-2">
@@ -266,18 +296,12 @@ export function PresaleCard() {
                     disabled={(!canBuy && step === 'idle') || isBusy || isDone}
                     onClick={handleBuyClick}
                     className={`focus-ring btn-3d-solid w-full rounded-2xl border px-6 py-3.5 text-sm font-mono font-bold tracking-wider transition-all ${
-                      chainId === BSC_MAINNET_CHAIN_ID
-                        ? canBuy && step === 'idle'
-                          ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black border-green-400/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer'
-                          : 'bg-green-500/50 text-white/60 border-green-400/20 cursor-not-allowed'
-                        : canBuy && step === 'idle'
-                          ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-black border-blue-400/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] cursor-pointer'
-                          : 'bg-gray-500/50 text-white/60 border-white/10 cursor-not-allowed'
+                      canBuy && step === 'idle'
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black border-green-400/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer'
+                        : 'bg-green-500/50 text-white/60 border-green-400/20 cursor-not-allowed'
                     }`}
                   >
-                    {chainId !== BSC_MAINNET_CHAIN_ID 
-                      ? 'Switch to BSC Mainnet' 
-                      : label}
+                    {label}
                   </button>
 
                   {/* Show error message if any */}

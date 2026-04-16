@@ -24,24 +24,28 @@ export function WalletConnectButton({ className = '', id }: WalletConnectButtonP
   const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const hasInitialized = useRef(false)
+  const switchAttemptRef = useRef(0)
 
-  // On connect: switch to BSC mainnet
+  // On connect or network change: auto-switch to BSC mainnet
   useEffect(() => {
-    if (isConnected && !hasInitialized.current) {
+    if (!isConnected) {
+      hasInitialized.current = false
+      switchAttemptRef.current = 0
+      return
+    }
+
+    if (!hasInitialized.current) {
       hasInitialized.current = true
-      if (chainId !== BSC_MAINNET_CHAIN_ID) {
-        switchChain({ chainId: BSC_MAINNET_CHAIN_ID })
-      }
+    }
+
+    if (chainId !== BSC_MAINNET_CHAIN_ID) {
+      console.log('🔄 Wrong network detected - attempting to switch to BSC Mainnet...')
+      switchAttemptRef.current += 1
+      switchChain({ chainId: BSC_MAINNET_CHAIN_ID })
+    } else {
+      switchAttemptRef.current = 0 // Reset on success
     }
   }, [isConnected, chainId, switchChain])
-
-  // If user changes network: disconnect
-  useEffect(() => {
-    if (isConnected && hasInitialized.current && chainId && chainId !== BSC_MAINNET_CHAIN_ID) {
-      console.log('🚫 Wrong network detected - disconnecting')
-      disconnect()
-    }
-  }, [isConnected, chainId, disconnect])
 
   useEffect(() => {
     if (!menuOpen) return
