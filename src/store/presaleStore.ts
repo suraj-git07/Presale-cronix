@@ -3,13 +3,13 @@ import { create } from 'zustand'
 export type PayAsset = 'USDT'
 
 export const DEMO_RATES = {
-  tokenPriceUsd: 0.05,
+  tokenPriceUsd: 0.15,
 } as const
 
 // Hard cap is fixed - only gets updated if presale parameters change
 export const DEMO_PRESALE = {
-  capUsd: 25_000_000, // 500k tokens * 0.05 USDT = 25M max
-  currentPriceLabel: '$0.05 / CRONIX',
+  capUsd: 750_000, // 5M tokens * 0.15 USDT = 750k max
+  currentPriceLabel: '$0.15 / CRONIX',
 } as const
 
 type PresaleState = {
@@ -17,7 +17,7 @@ type PresaleState = {
   isHydrating: boolean
   /** Unix ms when next price tier activates */
   nextTierEndsAt: number
-  /** Total USDT raised so far - calculated from totalTokensSold * 0.05 */
+  /** Total USDT raised so far - calculated from totalTokensSold * 0.15 */
   raisedUsd: number
   /** Total tokens sold from contract (wei) */
   totalTokensSold: number
@@ -93,7 +93,7 @@ export function isAmountExceedsCapacity(amount: string, raisedUsd: number): bool
 export const usePresaleStore = create<PresaleState>((set) => ({
   amount: '',
   isHydrating: true,
-  nextTierEndsAt: new Date(Date.UTC(2026, 3, 20, 0, 0, 0)).getTime(),
+  nextTierEndsAt: new Date(Date.UTC(2026, 5, 1, 0, 0, 0)).getTime(),
   raisedUsd: 0, // Calculated from totalTokensSold
   totalTokensSold: 0, // From contract
   maxSupply: 0, // From contract (500k * 1e18)

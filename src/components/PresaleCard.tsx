@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useConnection, useAccount } from 'wagmi'
-import { bscTestnet } from 'viem/chains'
+
+const BSC_MAINNET_CHAIN_ID = 56
 import { formatUnits } from 'viem'
 import { CountdownTimer } from '@/components/CountdownTimer'
 import { ProgressBar } from '@/components/ProgressBar'
@@ -18,10 +19,6 @@ import {
   isAmountExceedsCapacity,
   usePresaleStore,
 } from '@/store/presaleStore'
-
-function formatUsd(n: number) {
-  return n.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
-}
 
 export function PresaleCard() {
   const reduceMotion = useReducedMotion()
@@ -62,9 +59,9 @@ export function PresaleCard() {
     }
   }, [totalTokensSold, setRaisedUsd])
 
-  // Sync max supply: 500k tokens = 25M USDT (500000 * 0.05)
+  // Sync max supply: 5M tokens = 750k USDT (5000000 * 0.15)
   useEffect(() => {
-    const maxSupplyTokens = 500_000 // From contract
+    const maxSupplyTokens = 5_000_000 // From contract
     const calculatedMaxUsd = maxSupplyTokens * DEMO_RATES.tokenPriceUsd
     setMaxSupply(maxSupplyTokens * 1e18) // Store as wei
     setMaxSupplyUsd(calculatedMaxUsd)
@@ -95,8 +92,10 @@ export function PresaleCard() {
 
   const tokens = computeTokensReceived(amount, DEMO_RATES.tokenPriceUsd)
   const exceedsCapacity = isAmountExceedsCapacity(amount, raisedUsd)
+  const amountNum = Number(amount.replace(/,/g, '').trim()) || 0
+  const isBelowMinimum = amountNum > 0 && amountNum < 50
   const progressPct = Math.round((raisedUsd / maxSupplyUsd) * 100)
-  const canBuy = isConnected && chainId === bscTestnet.id && tokens !== null && tokens > 0 && !exceedsCapacity
+  const canBuy = isConnected && chainId === BSC_MAINNET_CHAIN_ID && tokens !== null && tokens > 0 && !exceedsCapacity && !isBelowMinimum
 
   const handleBuyClick = async () => {
     playUiClick()
@@ -195,10 +194,10 @@ export function PresaleCard() {
           </div>
 
           <p className="mb-6 text-center text-sm text-white/45">
-            <span className="font-mono text-white">{formatUsd(raisedUsd)}</span>
+            <span className="font-mono text-white">{(raisedUsd / DEMO_RATES.tokenPriceUsd).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
             <span className="text-white/22"> / </span>
-            <span className="font-mono text-white/75">{formatUsd(maxSupplyUsd)}</span>
-            <span className="block text-xs text-white/28">Total raised / Max supply</span>
+            <span className="font-mono text-white/75">{(maxSupplyUsd / DEMO_RATES.tokenPriceUsd).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+            <span className="block text-xs text-white/28">Tokens sold / Max supply</span>
           </p>
         </div>
 
@@ -213,6 +212,11 @@ export function PresaleCard() {
         </div>
 
         <TokenCalculator />
+        
+        {/* Show minimum amount warning */}
+        {isBelowMinimum && (
+          <p className="text-xs text-yellow-400 px-2 mt-2"> Minimum purchase is $50 USDT</p>
+        )}
 
         {/* User holdings - show when connected */}
         {isConnected && (
@@ -262,7 +266,7 @@ export function PresaleCard() {
                     disabled={(!canBuy && step === 'idle') || isBusy || isDone}
                     onClick={handleBuyClick}
                     className={`focus-ring btn-3d-solid w-full rounded-2xl border px-6 py-3.5 text-sm font-mono font-bold tracking-wider transition-all ${
-                      chainId === bscTestnet.id
+                      chainId === BSC_MAINNET_CHAIN_ID
                         ? canBuy && step === 'idle'
                           ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-black border-green-400/50 hover:shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer'
                           : 'bg-green-500/50 text-white/60 border-green-400/20 cursor-not-allowed'
@@ -271,8 +275,8 @@ export function PresaleCard() {
                           : 'bg-gray-500/50 text-white/60 border-white/10 cursor-not-allowed'
                     }`}
                   >
-                    {chainId !== bscTestnet.id 
-                      ? 'Switch to BSC Testnet' 
+                    {chainId !== BSC_MAINNET_CHAIN_ID 
+                      ? 'Switch to BSC Mainnet' 
                       : label}
                   </button>
 

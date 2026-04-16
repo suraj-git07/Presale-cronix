@@ -3,7 +3,8 @@ import { useConnect, useConnection, useDisconnect, useSwitchChain, useAccount } 
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { playUiClick } from '@/lib/sound'
-import { bscTestnet } from 'viem/chains'
+
+const BSC_MAINNET_CHAIN_ID = 56
 
 function shortAddress(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`
@@ -22,14 +23,25 @@ export function WalletConnectButton({ className = '', id }: WalletConnectButtonP
   const { switchChain } = useSwitchChain()
   const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const hasInitialized = useRef(false)
 
-  // Auto-switch to BSC Testnet when wallet connects if on different chain
+  // On connect: switch to BSC mainnet
   useEffect(() => {
-    if (isConnected && chainId && chainId !== bscTestnet.id) {
-      switchChain({ chainId: bscTestnet.id })
-      console.log(' Switching to BSC Testnet (97)...')
+    if (isConnected && !hasInitialized.current) {
+      hasInitialized.current = true
+      if (chainId !== BSC_MAINNET_CHAIN_ID) {
+        switchChain({ chainId: BSC_MAINNET_CHAIN_ID })
+      }
     }
   }, [isConnected, chainId, switchChain])
+
+  // If user changes network: disconnect
+  useEffect(() => {
+    if (isConnected && hasInitialized.current && chainId && chainId !== BSC_MAINNET_CHAIN_ID) {
+      console.log('🚫 Wrong network detected - disconnecting')
+      disconnect()
+    }
+  }, [isConnected, chainId, disconnect])
 
   useEffect(() => {
     if (!menuOpen) return

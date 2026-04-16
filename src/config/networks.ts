@@ -13,6 +13,6 @@ export const NETWORKS = {
   },
 }
 
-export const CURRENT_NETWORK = NETWORKS.bscTestnet
+export const CURRENT_NETWORK = NETWORKS.bscMainnet
 
 export const DEFAULT_CHAIN_ID = CURRENT_NETWORK.id

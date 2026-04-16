@@ -8,8 +8,9 @@ import { useToastStore } from '@/store/toastStore'
 type TransactionStep = 'idle' | 'approving' | 'approve-confirm' | 'buying' | 'buy-confirm' | 'success' | 'error'
 
 export function useBuyTokensFlow(amountUsdt: string) {
-  const { address: userAddress, chainId = 97 } = useAccount()
-  const addresses = getContractAddresses(chainId)
+  const { address: userAddress, chainId } = useAccount()
+  const isCorrectChain = chainId === 56
+  const addresses = isCorrectChain ? getContractAddresses(chainId) : getContractAddresses(56)
   const [step, setStep] = useState<TransactionStep>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const addToast = useToastStore((state) => state.addToast)
@@ -17,13 +18,13 @@ export function useBuyTokensFlow(amountUsdt: string) {
 
   const amountWei = amountUsdt ? parseUnits(amountUsdt, 18) : 0n
 
-  // 1. Check current USDT allowance
+  // 1. Check current USDT allowance - ONLY on correct chain
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: addresses.usdt as `0x${string}`,
     abi: USDT_ABI,
     functionName: 'allowance',
     args: [userAddress!, addresses.presale as `0x${string}`],
-    query: { enabled: !!userAddress },
+    query: { enabled: isCorrectChain && !!userAddress },
   })
 
   const needsApproval = allowance !== undefined && (allowance as bigint) < amountWei && amountWei > 0n

@@ -6,7 +6,7 @@ import { NETWORKS } from '@/config/networks'
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
 
 export const wagmiConfig = createConfig({
-  chains: [bscTestnet, bsc], // Support both testnet and mainnet
+  chains: [bsc, bscTestnet], // Primary chain is bsc (mainnet)
   connectors: [
     injected(),
     ...(projectId ? [walletConnect({ projectId })] : []),

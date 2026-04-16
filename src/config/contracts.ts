@@ -10,9 +10,9 @@ export const CONTRACTS = {
 
   // BSC Mainnet 
   [NETWORKS.bscMainnet.id]: {
-    presale: '0x', // Will add on mainnet deployment
-    usdt: '0x55d398326f99059fF775485246999027B3197955', // Official USDT on BSC
-    cronix: '0x', // Will add on mainnet deployment
+    presale: '0x9C07B38340b22269B48a773428a52ed05647f52D',
+    usdt: '0x55d398326f99059fF775485246999027B3197955',
+    cronix: '0x3242A362d3b403C1137d1b51c96e6f209080181b',
   },
 }
 
@@ -21,7 +21,7 @@ export function getContractAddresses(chainId: number) {
 }
 
 export const PRESALE_CONFIG = {
-  cronixPriceUsd: 0.05,
+  cronixPriceUsd: 0.15,
   walletAPercentage: 95,
   walletBPercentage: 5,
 }

@@ -7,34 +7,33 @@ import { PRESALE_ABI } from '@/config/abis'
 import { useToastStore } from '@/store/toastStore'
 
 export function usePresaleContract() {
-  const { address: userAddress, chainId = 97 } = useAccount()
-  const addresses = getContractAddresses(chainId)
+  const { address: userAddress, chainId } = useAccount()
+  const isCorrectChain = chainId === 56 // Only on BSC mainnet
+  const addresses = isCorrectChain ? getContractAddresses(chainId) : getContractAddresses(56)
 
   // Debug logging
-  if (userAddress) {
+  if (userAddress && isCorrectChain) {
     console.log('🔗 usePresaleContract initialized:', {
       userAddress,
       chainId,
       presaleAddress: addresses.presale,
-      usdtAddress: addresses.usdt,
-      cronixAddress: addresses.cronix,
     })
   }
 
-  // Get presale info
+  // Get presale info - ONLY on correct chain
   const { data: presaleInfo, refetch: refetchPresaleInfo } = useReadContract({
     address: addresses.presale as `0x${string}`,
     abi: PRESALE_ABI,
     functionName: 'presaleInfo',
-    query: { enabled: !!addresses.presale },
+    query: { enabled: isCorrectChain && !!addresses.presale },
   })
 
-  // Get total tokens sold
+  // Get total tokens sold - ONLY on correct chain
   const { data: totalTokensSold, refetch: refetchTotalTokensSold } = useReadContract({
     address: addresses.presale as `0x${string}`,
     abi: PRESALE_ABI,
     functionName: 'totalTokensSold',
-    query: { enabled: !!addresses.presale },
+    query: { enabled: isCorrectChain && !!addresses.presale },
   })
 
   // Log total tokens sold when it updates
@@ -44,21 +43,21 @@ export function usePresaleContract() {
     }
   }, [totalTokensSold])
 
-  // Get tokens bought by user
+  // Get tokens bought by user - ONLY on correct chain
   const { data: tokensBoughtByUser, refetch: refetchTokensBought } = useReadContract({
     address: addresses.presale as `0x${string}`,
     abi: PRESALE_ABI,
     functionName: 'tokensBoughtBy',
     args: [userAddress!],
-    query: { enabled: !!userAddress, refetchInterval: 3000 },
+    query: { enabled: isCorrectChain && !!userAddress, refetchInterval: 3000 },
   })
 
-  // Check if claiming is allowed
+  // Check if claiming is allowed - ONLY on correct chain
   const { data: claimAllowed } = useReadContract({
     address: addresses.presale as `0x${string}`,
     abi: PRESALE_ABI,
     functionName: 'claimAllowed',
-    query: { enabled: !!addresses.presale },
+    query: { enabled: isCorrectChain && !!addresses.presale },
   })
 
   // Buy tokens write

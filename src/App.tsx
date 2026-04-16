@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { useConnection, useAccount } from 'wagmi'
 import { CosmicBackdrop } from '@/components/CosmicBackdrop'
 import { ToastContainer } from '@/components/ToastContainer'
 import { PresaleCard } from '@/components/PresaleCard'
@@ -6,8 +8,20 @@ import { HeroSection } from '@/components/sections/HeroSection'
 import { HowToBuySection } from '@/components/sections/HowToBuySection'
 import { RoadmapSection } from '@/components/sections/RoadmapSection'
 import { TokenomicsSection } from '@/components/sections/TokenomicsSection'
+import { useToastStore } from '@/store/toastStore'
 
 export default function App() {
+  const { isConnected } = useConnection()
+  const { chainId } = useAccount()
+  const addToast = useToastStore((state) => state.addToast)
+  const isWrongNetwork = isConnected && chainId && chainId !== 56
+
+  useEffect(() => {
+    if (isWrongNetwork) {
+      addToast(' Please switch to BSC Mainnet', 'info', 5000)
+    }
+  }, [isWrongNetwork, addToast])
+
   return (
     <>
       <CosmicBackdrop />
