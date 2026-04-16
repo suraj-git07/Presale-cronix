@@ -93,7 +93,7 @@ export function isAmountExceedsCapacity(amount: string, raisedUsd: number): bool
 export const usePresaleStore = create<PresaleState>((set) => ({
   amount: '',
   isHydrating: true,
-  nextTierEndsAt: Date.now() + 1000 * 60 * 60 * 48,
+  nextTierEndsAt: new Date(Date.UTC(2026, 3, 20, 0, 0, 0)).getTime(),
   raisedUsd: 0, // Calculated from totalTokensSold
   totalTokensSold: 0, // From contract
   maxSupply: 0, // From contract (500k * 1e18)
