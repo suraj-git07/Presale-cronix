@@ -87,36 +87,82 @@ export function HeroSection() {
 
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/28 to-transparent shadow-[0_0_20px_rgba(255,255,255,0.25)]" />
 
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 20, rotateX: 8 }}
-        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        style={{ transformStyle: 'preserve-3d' }}
-        className="relative z-10 max-w-4xl text-center"
-      >
-        <p className="mb-4 font-[family-name:var(--font-orbitron)] text-sm font-semibold tracking-[0.35em] text-white/40 drop-shadow-[0_0_14px_rgba(255,255,255,0.08)]">
-          CroniX presale · $CRONIX
-        </p>
-        <h1 className="text-3d-hero font-[family-name:var(--font-orbitron)] text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl md:text-7xl">
-          ENTER THE CRONIX PRESALE
-        </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base text-white/45 sm:text-lg [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
-          Secure your CRONIX before launch
-        </p>
+      {/* Animated top gradient line */}
+      {!reduceMotion && (
+        <motion.div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0"
+          animate={{ opacity: [0, 0.8, 0], y: [0, 20, 0] }}
+          transition={{ duration: 3, repeat: Infinity }}
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(34,211,238,0.6), transparent)',
+            boxShadow: '0 0 30px rgba(34,211,238,0.4)',
+          }}
+        />
+      )}
 
-        {/* <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-          <WalletConnectButton id="hero-connect" className="w-full sm:w-auto" />
-          <button
-            type="button"
-            className="focus-ring btn-3d w-full rounded-2xl border border-white/18 bg-[#050505] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:border-white/38 hover:bg-[#080808] sm:w-auto"
-            onClick={() => {
-              playUiClick()
-              scrollToPresale()
-            }}
+      {/* Floating content wrapper */}
+      <motion.div
+        animate={reduceMotion ? undefined : { y: [0, -15, 0] }}
+        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 20, rotateX: 8 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          style={{ transformStyle: 'preserve-3d' }}
+          className="relative z-10 max-w-4xl text-center"
+          whileHover={
+            reduceMotion
+              ? undefined
+              : {
+                  rotateX: 5,
+                  rotateY: -2,
+                  scale: 1.02,
+                  transition: { type: 'spring', stiffness: 200, damping: 15 },
+                }
+          }
+        >
+          <p className="mb-4 font-[family-name:var(--font-orbitron)] text-sm font-semibold tracking-[0.35em] text-white/40 drop-shadow-[0_0_14px_rgba(255,255,255,0.08)]">
+            CroniX presale · $CRONIX
+          </p>
+
+          {/* Main heading with glow animation */}
+          <motion.h1
+            className="text-3d-hero font-[family-name:var(--font-orbitron)] text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl md:text-7xl"
+            animate={
+              reduceMotion
+                ? undefined
+                : {
+                    textShadow: [
+                      '0 0 20px rgba(34,211,238,0.5), 0 0 40px rgba(34,211,238,0.3)',
+                      '0 0 30px rgba(168,85,247,0.5), 0 0 60px rgba(168,85,247,0.3)',
+                      '0 0 20px rgba(34,211,238,0.5), 0 0 40px rgba(34,211,238,0.3)',
+                    ],
+                  }
+            }
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
-            Buy Tokens
-          </button>
-        </div> */}
+            ENTER THE CRONIX PRESALE
+          </motion.h1>
+
+          <p className="mx-auto mt-5 max-w-xl text-base text-white/45 sm:text-lg [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
+            Secure your CRONIX before launch
+          </p>
+
+          {/* <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
+            <WalletConnectButton id="hero-connect" className="w-full sm:w-auto" />
+            <button
+              type="button"
+              className="focus-ring btn-3d w-full rounded-2xl border border-white/18 bg-[#050505] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:border-white/38 hover:bg-[#080808] sm:w-auto"
+              onClick={() => {
+                playUiClick()
+                scrollToPresale()
+              }}
+            >
+              Buy Tokens
+            </button>
+          </div> */}
+        </motion.div>
       </motion.div>
     </section>
   )
