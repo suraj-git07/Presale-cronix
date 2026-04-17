@@ -95,7 +95,7 @@ export function PresaleCard() {
   const tokens = computeTokensReceived(amount, DEMO_RATES.tokenPriceUsd)
   const exceedsCapacity = isAmountExceedsCapacity(amount, raisedUsd)
   const amountNum = Number(amount.replace(/,/g, '').trim()) || 0
-  const isBelowMinimum = amountNum > 0 && amountNum < 50
+  const isBelowMinimum = amountNum > 0 && amountNum < 15
   const progressPct = Math.round((raisedUsd / maxSupplyUsd) * 100)
   const canBuy = isConnected && chainId === BSC_MAINNET_CHAIN_ID && tokens !== null && tokens > 0 && !exceedsCapacity && !isBelowMinimum
 
@@ -238,7 +238,7 @@ export function PresaleCard() {
         
         {/* Show minimum amount warning */}
         {isBelowMinimum && (
-          <p className="text-xs text-yellow-400 px-2 mt-2"> Minimum purchase is $50 USDT</p>
+          <p className="text-xs text-yellow-400 px-2 mt-2"> Minimum purchase is $15 USDT</p>
         )}
 
         {/* Show network switch failed alert */}
