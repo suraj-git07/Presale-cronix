@@ -27,6 +27,12 @@ export function PresaleCard() {
   const [networkSwitchFailed, setNetworkSwitchFailed] = useState(false)
   const networkCheckRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   
+  // Persist last known tokens sold - shows cached value when disconnected
+  const [lastKnownTokensSold, setLastKnownTokensSold] = useState(() => {
+    const stored = localStorage.getItem('lastKnownTokensSold')
+    return stored ? BigInt(stored) : 0n
+  })
+  
   // Store state
   const isHydrating = usePresaleStore((s) => s.isHydrating)
   const finishHydration = usePresaleStore((s) => s.finishHydration)
@@ -54,11 +60,24 @@ export function PresaleCard() {
   useEffect(() => {
     if (totalTokensSold) {
       const tokensSoldBig = totalTokensSold as bigint
+      // Update last known value and persist to localStorage
+      setLastKnownTokensSold(tokensSoldBig)
+      localStorage.setItem('lastKnownTokensSold', tokensSoldBig.toString())
+      
       const tokensSoldNumber = Number(formatUnits(tokensSoldBig, 18))
       const calculatedRaisedUsd = tokensSoldNumber * DEMO_RATES.tokenPriceUsd
       setRaisedUsd(calculatedRaisedUsd)
     }
   }, [totalTokensSold, setRaisedUsd])
+
+  // Fallback: use last known tokens sold when not connected to blockchain
+  useEffect(() => {
+    if (!isConnected && lastKnownTokensSold > 0n) {
+      const tokensSoldNumber = Number(formatUnits(lastKnownTokensSold, 18))
+      const calculatedRaisedUsd = tokensSoldNumber * DEMO_RATES.tokenPriceUsd
+      setRaisedUsd(calculatedRaisedUsd)
+    }
+  }, [isConnected, lastKnownTokensSold, setRaisedUsd])
 
   // Sync max supply from the configured presale allocation.
   useEffect(() => {
