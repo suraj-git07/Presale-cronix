@@ -170,19 +170,17 @@ export function HeroSection() {
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.18, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-8 flex items-center justify-center"
+            className="relative z-20 mt-8 flex items-center justify-center pointer-events-auto"
           >
-            <motion.a
+            <a
               href={WHITEPAPER_URL}
               target="_blank"
               rel="noreferrer"
-              whileHover={reduceMotion ? undefined : { y: -3, scale: 1.02 }}
-              whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-              className="focus-ring inline-flex items-center gap-3 rounded-full border border-white/16 bg-white/[0.06] px-6 py-3 font-[family-name:var(--font-orbitron)] text-sm font-semibold uppercase tracking-[0.22em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm transition-colors hover:border-white/30 hover:bg-white/[0.1]"
+              className="focus-ring pointer-events-auto cursor-pointer inline-flex items-center gap-3 rounded-full border border-white/16 bg-white/[0.06] px-6 py-3 font-[family-name:var(--font-orbitron)] text-sm font-semibold uppercase tracking-[0.22em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm transition-all duration-200 hover:border-white/30 hover:bg-white/[0.1] hover:-translate-y-0.5 hover:scale-101"
             >
               <span className="h-2 w-2 rounded-full bg-white shadow-[0_0_14px_rgba(255,255,255,0.9)]" />
               Whitepaper
-            </motion.a>
+            </a>
           </motion.div>
         </motion.div>
 
