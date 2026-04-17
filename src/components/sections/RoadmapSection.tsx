@@ -13,7 +13,7 @@ export function RoadmapSection() {
           viewport={{ once: true }}
           className="mb-12 text-center font-[family-name:var(--font-orbitron)] text-3xl font-semibold tracking-wide text-white sm:text-4xl"
         >
-          CroniX roadmap
+          Cronix Roadmap
         </motion.h2>
         <RoadmapTimeline />
       </div>

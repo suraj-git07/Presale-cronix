@@ -43,10 +43,14 @@ function Ring({ label, value, pct, sub, gradId }: RingProps) {
 }
 
 const cardData: Omit<RingProps, 'gradId'>[] = [
-  { label: 'Total supply', value: '1B', pct: 100, sub: 'CRONIX' },
-  { label: 'CroniX presale allocation', value: '35%', pct: 35, sub: 'of supply' },
-  { label: 'Liquidity', value: '40%', pct: 40, sub: 'locked' },
-  { label: 'Team', value: '10%', pct: 10, sub: 'vested' },
+  { label: 'Total supply', value: '10M', pct: 100, sub: 'CRONIX' },
+  { label: 'Pre-sale', value: '500K', pct: 5, sub: '5% allocation' },
+  { label: 'Founder & team', value: '1M', pct: 10, sub: '10% allocation' },
+  { label: 'Treasury', value: '4M', pct: 40, sub: '40% allocation' },
+  { label: 'Advisors', value: '800K', pct: 8, sub: '8% allocation' },
+  { label: 'Partnership & exchange', value: '1.5M', pct: 15, sub: '15% allocation' },
+  { label: 'Ecosystem', value: '2M', pct: 20, sub: '20% allocation' },
+  { label: 'Public sale', value: '200K', pct: 2, sub: '2% allocation' },
 ]
 
 export function TokenomicsSection() {

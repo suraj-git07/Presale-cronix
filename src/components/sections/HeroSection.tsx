@@ -3,6 +3,8 @@ import { motion, useReducedMotion } from 'framer-motion'
 
 type Particle = { id: number; x: string; y: string; d: number; delay: number; big?: boolean }
 
+const WHITEPAPER_URL = 'https://docs.google.com/document/d/14sGbJi5Sy7dGx2whkLw3-tNgMUhqucn_gnB1ZC5sfnQ/edit?usp=sharing'
+
 export function HeroSection() {
   const reduceMotion = useReducedMotion()
   const particles = useMemo((): Particle[] => {
@@ -85,9 +87,26 @@ export function HeroSection() {
         ))}
       </div>
 
+      {!reduceMotion ? (
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-[44%] h-[20rem] w-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10"
+          animate={{ scale: [0.94, 1.08, 0.94], opacity: [0.16, 0.28, 0.16], rotate: [0, 180, 360] }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
+          style={{ boxShadow: '0 0 80px rgba(255,255,255,0.08), inset 0 0 40px rgba(255,255,255,0.05)' }}
+        />
+      ) : null}
+
+      {!reduceMotion ? (
+        <motion.div
+          className="pointer-events-none absolute left-1/2 top-[44%] h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          animate={{ opacity: [0.06, 0.14, 0.06], scale: [0.98, 1.04, 0.98] }}
+          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 24%, transparent 62%)' }}
+        />
+      ) : null}
+
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/28 to-transparent shadow-[0_0_20px_rgba(255,255,255,0.25)]" />
 
-      {/* Animated top gradient line */}
       {!reduceMotion && (
         <motion.div
           className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0"
@@ -100,7 +119,6 @@ export function HeroSection() {
         />
       )}
 
-      {/* Floating content wrapper */}
       <motion.div
         animate={reduceMotion ? undefined : { y: [0, -15, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -126,7 +144,6 @@ export function HeroSection() {
             CroniX presale · $CRONIX
           </p>
 
-          {/* Main heading with glow animation */}
           <motion.h1
             className="text-3d-hero font-[family-name:var(--font-orbitron)] text-4xl font-bold leading-tight tracking-tight text-white sm:text-6xl md:text-7xl"
             animate={
@@ -142,30 +159,34 @@ export function HeroSection() {
             }
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
           >
-            ENTER THE CRONIX PRESALE
+            ENTER THE $CRONIX PRESALE
           </motion.h1>
 
           <p className="mx-auto mt-5 max-w-xl font-[family-name:var(--font-orbitron)] text-base text-white/45 sm:text-lg [text-shadow:0_2px_20px_rgba(0,0,0,0.95)]">
             Secure your CRONIX before launch
           </p>
 
-          {/* <div className="mt-10 flex flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-            <WalletConnectButton id="hero-connect" className="w-full sm:w-auto" />
-            <button
-              type="button"
-              className="focus-ring btn-3d w-full rounded-2xl border border-white/18 bg-[#050505] px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:border-white/38 hover:bg-[#080808] sm:w-auto"
-              onClick={() => {
-                playUiClick()
-                scrollToPresale()
-              }}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-8 flex items-center justify-center"
+          >
+            <motion.a
+              href={WHITEPAPER_URL}
+              target="_blank"
+              rel="noreferrer"
+              whileHover={reduceMotion ? undefined : { y: -3, scale: 1.02 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+              className="focus-ring inline-flex items-center gap-3 rounded-full border border-white/16 bg-white/[0.06] px-6 py-3 font-[family-name:var(--font-orbitron)] text-sm font-semibold uppercase tracking-[0.22em] text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm transition-colors hover:border-white/30 hover:bg-white/[0.1]"
             >
-              Buy Tokens
-            </button>
-          </div> */}
+              <span className="h-2 w-2 rounded-full bg-white shadow-[0_0_14px_rgba(255,255,255,0.9)]" />
+              Whitepaper
+            </motion.a>
+          </motion.div>
         </motion.div>
 
-        {/* Scroll down indicator */}
-        <motion.div 
+        <motion.div
           className="mt-12 flex flex-col items-center gap-2"
           animate={reduceMotion ? undefined : { y: [0, 8, 0] }}
           transition={{ duration: 2, repeat: Infinity }}

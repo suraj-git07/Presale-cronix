@@ -61,9 +61,9 @@ export function PresaleCard() {
     }
   }, [totalTokensSold, setRaisedUsd])
 
-  // Sync max supply: 5M tokens = 750k USDT (5000000 * 0.15)
+  // Sync max supply from the configured presale allocation.
   useEffect(() => {
-    const maxSupplyTokens = 5_000_000 // From contract
+    const maxSupplyTokens = DEMO_PRESALE.capTokens
     const calculatedMaxUsd = maxSupplyTokens * DEMO_RATES.tokenPriceUsd
     setMaxSupply(maxSupplyTokens * 1e18) // Store as wei
     setMaxSupplyUsd(calculatedMaxUsd)

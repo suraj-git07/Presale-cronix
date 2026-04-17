@@ -3,7 +3,7 @@ import { CheckCircle2, Coins, Wallet, Zap } from 'lucide-react'
 
 const steps = [
   { icon: Wallet, title: 'Connect wallet', text: 'Use MetaMask or any WalletConnect wallet.' },
-  { icon: Coins, title: 'Enter amount', text: 'Pick BNB or USDT and type how much to contribute.' },
+  { icon: Coins, title: 'Enter amount', text: 'Enter the USDT amount you want to contribute.' },
   { icon: Zap, title: 'Confirm transaction', text: 'Review gas and approve in your wallet.' },
   {
     icon: CheckCircle2,

@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useConnection, useAccount } from 'wagmi'
 import { CosmicBackdrop } from '@/components/CosmicBackdrop'
 import { ScrollTracker } from '@/components/ScrollTracker'
@@ -14,6 +15,7 @@ import { useToastStore } from '@/store/toastStore'
 export default function App() {
   const { isConnected } = useConnection()
   const { chainId } = useAccount()
+  const reduceMotion = useReducedMotion()
   const addToast = useToastStore((state) => state.addToast)
   const isWrongNetwork = isConnected && chainId && chainId !== 56
 
@@ -28,12 +30,42 @@ export default function App() {
       <CosmicBackdrop />
       <ScrollTracker />
       <div className="relative z-10 min-h-svh bg-transparent text-white antialiased">
-        <HeroSection />
-        <PresaleCard />
-        <TokenomicsSection />
-        <RoadmapSection />
-        <HowToBuySection />
-        <FooterSection />
+        <motion.div
+          initial={reduceMotion ? false : 'hidden'}
+          animate="show"
+          variants={{
+            hidden: {},
+            show: {
+              transition: {
+                staggerChildren: 0.08,
+                delayChildren: 0.06,
+              },
+            },
+          }}
+        >
+          {[
+            <HeroSection key="hero" />,
+            <PresaleCard key="presale" />,
+            <TokenomicsSection key="tokenomics" />,
+            <RoadmapSection key="roadmap" />,
+            <HowToBuySection key="how-to-buy" />,
+            <FooterSection key="footer" />,
+          ].map((section) => (
+            <motion.div
+              key={section.key}
+              variants={{
+                hidden: { opacity: 0, y: 18 },
+                show: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
+                },
+              }}
+            >
+              {section}
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
       <ToastContainer />
     </>

@@ -1,25 +1,84 @@
 import { motion, useReducedMotion } from 'framer-motion'
 
 const phases = [
-  { quarter: 'Q1', title: 'Wallet launch', body: 'Secure custody flows and chain support.' },
-  { quarter: 'Q2', title: 'Beta + integrations', body: 'Partners, APIs, and performance hardening.' },
-  { quarter: 'Q3', title: 'CroniX token presale', body: 'Community allocation and liquidity prep.' },
-  { quarter: 'Q4', title: 'Full ecosystem', body: 'Live economy, seasons, and expansions.' },
+  {
+    period: 'Q1 2026',
+    title: 'Launch & Community',
+    points: [
+      'Token presale goes live with early community access.',
+      'Staking and validator program introduced.',
+      'Gamified onboarding and reward campaigns begin.',
+    ],
+  },
+  {
+    period: 'Q2 2026',
+    title: 'Growth & Early Access',
+    points: [
+      'Partnerships and ecosystem collaborations expand.',
+      'Early product prototypes for wallet and gaming released.',
+      'Community incentives and engagement systems scale.',
+    ],
+  },
+  {
+    period: 'Q3 2026',
+    title: 'Product Rollout',
+    points: [
+      'Non-custodial wallet beta launch with multi-chain support.',
+      'ZebraSwap DEX goes live with initial liquidity.',
+      'Cronix Crypto Card beta for real-world payments.',
+    ],
+  },
+  {
+    period: 'Q4 2026',
+    title: 'Ecosystem Expansion',
+    points: [
+      'Full wallet launch with secure custody flows.',
+      'Gaming ecosystem and asset ownership system rollout.',
+      'Gamify engine expansion with missions, XP, and rewards.',
+    ],
+  },
+  {
+    period: 'Q1-Q2 2027',
+    title: 'Core Infrastructure',
+    points: [
+      'Cronix blockchain mainnet launch.',
+      'Validator network expansion and decentralization.',
+      'Developer ecosystem, SDKs, and DeFi integrations.',
+    ],
+  },
+  {
+    period: 'Q3-Q4 2027',
+    title: 'Scale & Global Reach',
+    points: [
+      'Major exchange listings and institutional partnerships.',
+      'DAO governance and community fund launch.',
+      'Global expansion across key regions.',
+    ],
+  },
+  {
+    period: '2028+',
+    title: 'Cronix 2.0',
+    points: [
+      'Layer 2 scaling and advanced infrastructure.',
+      'RWA, DePIN, and real-world integrations.',
+      'Full Web3 ecosystem (Wallet + DEX + Gaming + Payments).',
+    ],
+  },
 ] as const
 
 export function RoadmapTimeline() {
   const reduceMotion = useReducedMotion()
 
   return (
-    <div className="relative mx-auto max-w-lg px-4">
+    <div className="relative mx-auto max-w-3xl px-4">
       <div
         className="absolute bottom-2 left-[0.6rem] top-2 w-px bg-gradient-to-b from-white/50 via-white/15 to-white/5"
         aria-hidden
       />
       <ul className="space-y-6">
-        {phases.map(({ quarter, title, body }, i) => (
+        {phases.map(({ period, title, points }, i) => (
           <motion.li
-            key={quarter}
+            key={period}
             initial={reduceMotion ? false : { opacity: 0, x: -12 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-40px' }}
@@ -39,10 +98,17 @@ export function RoadmapTimeline() {
               className="surface-3d-subtle min-w-0 flex-1 rounded-2xl p-5 transition-[transform,box-shadow]"
             >
               <p className="font-[family-name:var(--font-orbitron)] text-xs font-semibold tracking-[0.25em] text-white/38">
-                {quarter}
+                {period}
               </p>
               <p className="mt-1 font-[family-name:var(--font-orbitron)] text-lg font-semibold text-white">{title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-white/42">{body}</p>
+              <ul className="mt-3 space-y-2 text-sm leading-relaxed text-white/42">
+                {points.map((point) => (
+                  <li key={point} className="flex gap-2">
+                    <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-white/45" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           </motion.li>
         ))}
