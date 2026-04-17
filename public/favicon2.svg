@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="planetGradient" cx="40%" cy="40%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:1" />
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Planet circle -->
+  <circle cx="70" cy="70" r="45" fill="url(#planetGradient)" filter="url(#glow)"/>
+  
+  <!-- Planet ring -->
+  <ellipse cx="70" cy="70" rx="65" ry="15" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.8"/>
+  
+  <!-- Streaks/light effects -->
+  <path d="M 40 40 Q 50 30 65 35" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M 35 70 Q 45 65 58 68" stroke="#ffffff" stroke-width="1.5" fill="none" opacity="0.4"/>
+  
+  <!-- Glare point -->
+  <circle cx="55" cy="55" r="8" fill="#ffffff" opacity="0.7" filter="url(#glow)"/>
+</svg>
