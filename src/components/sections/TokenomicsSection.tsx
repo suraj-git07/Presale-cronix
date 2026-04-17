@@ -43,7 +43,7 @@ function Ring({ label, value, pct, sub, gradId }: RingProps) {
 }
 
 const cardData: Omit<RingProps, 'gradId'>[] = [
-  { label: 'Total supply', value: '10M', pct: 100, sub: 'CRONIX' },
+  { label: 'Total supply', value: '100M', pct: 100, sub: 'CRONIX' },
   { label: 'Pre-sale', value: '500K', pct: 5, sub: '5% allocation' },
   { label: 'Founder & team', value: '1M', pct: 10, sub: '10% allocation' },
   { label: 'Treasury', value: '4M', pct: 40, sub: '40% allocation' },
