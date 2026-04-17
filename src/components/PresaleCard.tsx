@@ -9,6 +9,7 @@ import { ProgressBar } from '@/components/ProgressBar'
 import { TokenCalculator } from '@/components/TokenCalculator'
 import { WalletConnectButton } from '@/components/WalletConnectButton'
 import { playUiClick } from '@/lib/sound'
+import { fetchInitialPresaleData } from '@/lib/presaleData'
 import { usePresaleContract } from '@/hooks/usePresaleContract'
 import { useBuyTokensFlow } from '@/hooks/useBuyTokensFlow'
 import { useTokenBalances } from '@/hooks/useTokenBalances'
@@ -32,6 +33,29 @@ export function PresaleCard() {
     const stored = localStorage.getItem('lastKnownTokensSold')
     return stored ? BigInt(stored) : 0n
   })
+
+  // Initialize presale data from contract on mount (no wallet needed)
+  useEffect(() => {
+    const initializePresaleData = async () => {
+      // Only fetch if we don't have cached data
+      if (localStorage.getItem('lastKnownTokensSold')) {
+        return
+      }
+
+      try {
+        const tokensSold = await fetchInitialPresaleData()
+        if (tokensSold > 0n) {
+          setLastKnownTokensSold(tokensSold)
+          localStorage.setItem('lastKnownTokensSold', tokensSold.toString())
+        }
+      } catch (_error) {
+        console.error('Failed to fetch initial presale data:', _error)
+        // Silent fail - will show 0 progress
+      }
+    }
+
+    initializePresaleData()
+  }, [])
   
   // Store state
   const isHydrating = usePresaleStore((s) => s.isHydrating)
