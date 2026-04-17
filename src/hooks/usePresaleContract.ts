@@ -11,15 +11,6 @@ export function usePresaleContract() {
   const isCorrectChain = chainId === 56 // Only on BSC mainnet
   const addresses = isCorrectChain ? getContractAddresses(chainId) : getContractAddresses(56)
 
-  // Debug logging
-  if (userAddress && isCorrectChain) {
-    console.log('🔗 usePresaleContract initialized:', {
-      userAddress,
-      chainId,
-      presaleAddress: addresses.presale,
-    })
-  }
-
   // Get presale info - ONLY on correct chain
   const { data: presaleInfo, refetch: refetchPresaleInfo } = useReadContract({
     address: addresses.presale as `0x${string}`,
@@ -38,9 +29,7 @@ export function usePresaleContract() {
 
   // Log total tokens sold when it updates
   useEffect(() => {
-    if (totalTokensSold !== undefined) {
-      console.log('totalTokensSold from contract:', totalTokensSold?.toString?.() || totalTokensSold)
-    }
+    // Silently track changes
   }, [totalTokensSold])
 
   // Get tokens bought by user - ONLY on correct chain
@@ -66,18 +55,10 @@ export function usePresaleContract() {
   const handleBuyTokens = useCallback(
     async (usdtAmount: string) => {
       if (!userAddress) {
-        console.error(' No user address')
         throw new Error('No user address')
       }
 
       const usdtAmountWei = parseUnits(usdtAmount, 18)
-
-      console.log(' Buying tokens with:', { 
-        usdtAmount,
-        usdtAmountWei: usdtAmountWei.toString(),
-        presaleAddress: addresses.presale,
-        userAddress,
-      })
 
       return new Promise<void>((resolve, reject) => {
         try {
@@ -90,11 +71,9 @@ export function usePresaleContract() {
               account: userAddress,
             },
             {
-              onSuccess: (txHash) => {
-                console.log('✅ Buy tx submitted:', txHash)
+              onSuccess: () => {
                 // Refetch after block confirmation (3-5 seconds for BSC)
                 setTimeout(() => {
-                  console.log('Refetching contract data after buy...')
                   refetchTokensBought()
                   refetchPresaleInfo()
                   refetchTotalTokensSold()
@@ -102,13 +81,11 @@ export function usePresaleContract() {
                 resolve()
               },
               onError: (error) => {
-                console.error(' Buy tx failed:', error)
                 reject(error)
               },
             }
           )
         } catch (error) {
-          console.error(' Buy error:', error)
           reject(error)
         }
       })
@@ -135,9 +112,7 @@ export function usePresaleContract() {
           account: userAddress,
         },
         {
-          onSuccess: (txHash) => {
-            console.log('🎉 Claim transaction confirmed:', txHash)
-            
+          onSuccess: () => {
             // Show success toast with claimed amount
             addToast(
               `Successfully claimed ${claimableAmount.toFixed(2)} tokens to your wallet!`,
@@ -146,31 +121,25 @@ export function usePresaleContract() {
             )
             
             // Refetch all contract data after claim with multiple intervals for safety
-            console.log('⏳ Starting refetch sequence...')
-            
             setTimeout(() => {
-              console.log('📊 First refetch (1.5s after tx)...')
               refetchTokensBought()
               refetchPresaleInfo()
               refetchTotalTokensSold()
             }, 1500)
             
             setTimeout(() => {
-              console.log('📊 Second refetch (3.5s after tx)...')
               refetchTokensBought()
               refetchPresaleInfo()
               refetchTotalTokensSold()
             }, 3500)
           },
           onError: (error) => {
-            console.error('❌ Claim failed:', error)
             const errorMsg = error?.message || 'Claim failed'
             addToast(errorMsg, 'error', 4000)
           },
         }
       )
     } catch (error) {
-      console.error('❌ Claim error:', error)
       const errorMsg = error instanceof Error ? error.message : 'Claim failed'
       addToast(errorMsg, 'error', 4000)
     }

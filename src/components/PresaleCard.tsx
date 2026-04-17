@@ -57,7 +57,6 @@ export function PresaleCard() {
       const tokensSoldNumber = Number(formatUnits(tokensSoldBig, 18))
       const calculatedRaisedUsd = tokensSoldNumber * DEMO_RATES.tokenPriceUsd
       setRaisedUsd(calculatedRaisedUsd)
-      console.log('Total tokens sold updated:', { tokensSoldBig: tokensSoldBig.toString(), tokensSoldNumber, raisedUsd: calculatedRaisedUsd })
     }
   }, [totalTokensSold, setRaisedUsd])
 
@@ -73,11 +72,6 @@ export function PresaleCard() {
     if (tokensBoughtByUser !== undefined && tokensBoughtByUser !== null) {
       const tokensBought = Number(formatUnits(tokensBoughtByUser as bigint, 18))
       setUserTokensBought(tokensBought)
-      console.log('✅ User tokens bought updated:', { 
-        raw: (tokensBoughtByUser as bigint).toString(), 
-        formatted: tokensBought,
-        isZero: tokensBought === 0
-      })
     }
   }, [tokensBoughtByUser, setUserTokensBought])
 
@@ -129,9 +123,7 @@ export function PresaleCard() {
   useEffect(() => {
     if (isDone) {
       // Refetch all contract data with delay for block confirmation
-      console.log('⏳ Waiting for block confirmation before refetch...')
       setTimeout(() => {
-        console.log('📊 Refetching all contract data...')
         refetchTokensBought?.()
         refetchPresaleInfo?.()
         refetchTotalTokensSold?.()
@@ -146,24 +138,19 @@ export function PresaleCard() {
   useEffect(() => {
     // Check if claim was in progress and now it's done
     if (prevIsClaimingRef.current && !isClaiming) {
-      console.log('✅ Claim transaction completed! Triggering UI refresh...')
-      
       // Immediate refetch
       refetchTokensBought?.()
       
       // Multiple refetch attempts at different intervals to catch the data update
       setTimeout(() => {
-        console.log('🔄 Refetch attempt 1 (1s)...')
         refetchTokensBought?.()
       }, 1000)
       
       setTimeout(() => {
-        console.log('🔄 Refetch attempt 2 (2.5s)...')
         refetchTokensBought?.()
       }, 2500)
       
       setTimeout(() => {
-        console.log('🔄 Refetch attempt 3 (4s)...')
         refetchTokensBought?.()
       }, 4000)
     }

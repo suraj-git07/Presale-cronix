@@ -19,13 +19,19 @@ export function useBuyTokensFlow(amountUsdt: string) {
   const amountWei = amountUsdt ? parseUnits(amountUsdt, 18) : 0n
 
   // 1. Check current USDT allowance - ONLY on correct chain
-  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+  const { data: allowance, refetch: refetchAllowance, isError: allowanceError, error: allowanceErrorMsg } = useReadContract({
     address: addresses.usdt as `0x${string}`,
     abi: USDT_ABI,
     functionName: 'allowance',
     args: [userAddress!, addresses.presale as `0x${string}`],
     query: { enabled: isCorrectChain && !!userAddress },
   })
+
+  useEffect(() => {
+    if (allowanceError) {
+      console.error('❌ Allowance check failed:', allowanceErrorMsg?.message)
+    }
+  }, [allowanceError, allowanceErrorMsg?.message])
 
   const needsApproval = allowance !== undefined && (allowance as bigint) < amountWei && amountWei > 0n
 
@@ -49,7 +55,6 @@ export function useBuyTokensFlow(amountUsdt: string) {
   useEffect(() => {
     if (!isApproveConfirmed || step !== 'approve-confirm') return
 
-    console.log('Approval confirmed, now buying...')
     setStep('buying')
     
     refetchAllowance().then(() => {
@@ -66,7 +71,6 @@ export function useBuyTokensFlow(amountUsdt: string) {
   useEffect(() => {
     if (!isBuyConfirmed || step !== 'buy-confirm') return
 
-    console.log('SUCCESS! Tokens purchased')
     setTimeout(() => {
       setStep('success')
       // Auto-reset to idle after 2 seconds
@@ -106,7 +110,6 @@ export function useBuyTokensFlow(amountUsdt: string) {
       }
 
       if (needsApproval) {
-        console.log('Requesting approval...')
         setStep('approving')
         
         approve({
@@ -119,7 +122,6 @@ export function useBuyTokensFlow(amountUsdt: string) {
         // After tx is submitted, wait for confirm
         setTimeout(() => setStep('approve-confirm'), 500)
       } else {
-        console.log('No approval needed, buying directly...')
         setStep('buying')
         
         buy({

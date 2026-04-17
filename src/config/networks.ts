@@ -8,7 +8,7 @@ export const NETWORKS = {
   bscMainnet: {
     id: 56,
     name: 'BSC Mainnet',
-    rpc: 'https://bsc-dataseed1.binance.org:8545',
+    rpc: 'https://bsc-dataseed.binance.org/',
     explorer: 'https://bscscan.com',
   },
 }

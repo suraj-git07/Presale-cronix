@@ -5,7 +5,7 @@ import { getContractAddresses } from '@/config/contracts'
 import { USDT_ABI } from '@/config/abis'
 
 export function useUsdtApproval(amountUsdt: string) {
-  const { address: userAddress, chainId = 97 } = useAccount()
+  const { address: userAddress, chainId = 56 } = useAccount()
   const addresses = getContractAddresses(chainId)
 
   const amountWei = amountUsdt ? parseUnits(amountUsdt, 18) : 0n
@@ -41,25 +41,19 @@ export function useUsdtApproval(amountUsdt: string) {
 
   const handleApprove = useCallback(async (): Promise<void> => {
     if (!simulationResult?.request) {
-      console.warn(' No approval needed, allowance already sufficient')
       return
     }
 
     return new Promise((resolve, reject) => {
-      console.log(' Requesting approval for USDT...')
-      
       writeApprove(simulationResult.request, {
-        onSuccess: (txHash) => {
-          console.log(' Approval tx submitted:', txHash)
+        onSuccess: () => {
           // Wait a bit then refetch
           setTimeout(() => {
             refetchAllowance()
-            console.log(' Approval confirmed!')
             resolve()
           }, 3000)
         },
         onError: (error) => {
-          console.error(' Approval failed:', error)
           reject(error)
         },
       })
