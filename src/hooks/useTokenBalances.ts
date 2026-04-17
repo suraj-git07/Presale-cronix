@@ -26,7 +26,7 @@ export function useTokenBalances() {
 
   useEffect(() => {
     if (error) {
-      console.error('❌ USDT Balance Error:', error?.message)
+      console.error(' USDT Balance Error:', error?.message)
     }
   }, [error])
 

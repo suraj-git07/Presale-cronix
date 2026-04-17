@@ -39,7 +39,7 @@ export function WalletConnectButton({ className = '', id }: WalletConnectButtonP
     }
 
     if (chainId !== BSC_MAINNET_CHAIN_ID) {
-      console.log('🔄 Wrong network detected - attempting to switch to BSC Mainnet...')
+      console.log(' Wrong network detected - attempting to switch to BSC Mainnet...')
       switchAttemptRef.current += 1
       switchChain({ chainId: BSC_MAINNET_CHAIN_ID })
     } else {

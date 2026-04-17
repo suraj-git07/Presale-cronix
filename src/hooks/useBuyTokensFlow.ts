@@ -29,7 +29,7 @@ export function useBuyTokensFlow(amountUsdt: string) {
 
   useEffect(() => {
     if (allowanceError) {
-      console.error('❌ Allowance check failed:', allowanceErrorMsg?.message)
+      console.error(' Allowance check failed:', allowanceErrorMsg?.message)
     }
   }, [allowanceError, allowanceErrorMsg?.message])
 
