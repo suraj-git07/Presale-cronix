@@ -5,7 +5,7 @@ const WHITEPAPER_URL = 'https://docs.google.com/document/d/14sGbJi5Sy7dGx2whkLw3
 const links = [
   { href: WHITEPAPER_URL, label: 'Whitepaper' },
   { href: 'https://x.com/cronixlive', label: 'Twitter' },
-  { href: 'https://t.me/cronixofficiall', label: 'Telegram' },
+  { href: 'https://t.me/cronixlive', label: 'Telegram' },
 ] as const
 
 export function FooterSection() {
