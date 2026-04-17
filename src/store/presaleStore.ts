@@ -8,8 +8,8 @@ export const DEMO_RATES = {
 
 // Hard cap is fixed - only gets updated if presale parameters change
 export const DEMO_PRESALE = {
-  capTokens: 500_000,
-  capUsd: 75_000, // 500k tokens * 0.15 USDT = 75k max
+  capTokens: 5_000_000,
+  capUsd: 750_000, // 5M tokens * 0.15 USDT = 750k max
   currentPriceLabel: '$0.15 / CRONIX',
 } as const
 
